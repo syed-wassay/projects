@@ -1,0 +1,23 @@
+{
+    "name":"s3-connector",
+    "connector.class":"io.streamthoughts.kafka.connect.filepulse.source.FilePulseSourceConnector",
+    "topic":"$SMART_THERMO_TOPIC_NAME",
+    "fs.listing.class":"io.streamthoughts.kafka.connect.filepulse.fs.AmazonS3FileSystemListing",
+    "fs.listing.interval.ms": 1000,
+    "file.filter.regex.pattern":".*\\.csv$",
+    "fs.cleanup.policy.class": "io.streamthoughts.kafka.connect.filepulse.fs.clean.DeleteCleanupPolicy",
+    "fs.cleanup.policy.triggered.on":"COMMITTED",
+    "aws.access.key.id":"$MINIO_ROOT_USER",
+    "aws.secret.access.key":"$MINIO_ROOT_PASSWORD",
+    "aws.s3.bucket.name":"$S3_BUCKET_NAME",
+    "aws.s3.service.endpoint": "$S3_ENDPOINT_URL",
+    "tasks.reader.class":"io.streamthoughts.kafka.connect.filepulse.fs.reader.AmazonS3RowFileInputReader",
+    "skip.headers":"1",
+    "offset.attributes.string":"uri",
+    "tasks.file.status.storage.bootstrap.servers":"$KAFKA_SERVER",
+    "filters": "ParseCSVLine",
+    "filters.ParseCSVLine.extract.column.name": "headers",
+    "filters.ParseCSVLine.trim.column": "true",
+    "filters.ParseCSVLine.seperator": ",",
+    "filters.ParseCSVLine.type": "io.streamthoughts.kafka.connect.filepulse.filter.DelimitedRowFilter"
+}

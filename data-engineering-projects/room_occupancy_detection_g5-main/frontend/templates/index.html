@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <div class="alert alert-info text-end d-none" role="alert" id="alertInfo">
+    </div>
+
+    <div class="row g-4" id="latest_data" data-last-updated="">
+    </div>
+    
+    <script>
+        $(document).ready(function(){
+            function getLatestData(){
+                let last_updated = $('#latest_data').data('last-updated')
+                $.ajax({
+                    type:"get",
+                    url:"/api/latest_data",
+                    datatype:"application/json",
+                    success:function(data)
+                    {
+                        if (!("message" in data)){
+                            let updated_ts = data['_id']
+                            if (updated_ts != last_updated){
+                                // generate html
+                                let html = ""
+                                $.each(data, function (key, value) {
+                                    if (key != '_id') {
+                                        html += `
+                                        <div class="col-lg-6">
+                                            <div id="${key}" class="shadow card text-center h-100 ${value['is_occupied'] ? 'border-success' : 'border-danger'}">
+                                                <div class="card-header ${value['is_occupied'] ? 'text-bg-success' : 'text-bg-danger'}">
+                                                    ${value['is_occupied'] ? '<i class="bi bi-house-check-fill"></i>' : '<i class="bi bi-house-x-fill"></i>'}&nbsp;${key}
+                                                    ${value['is_occupied'] ? '(occupied)' : '(vacant)'}
+                                                </div>
+                                                <div class="card-body row g-4">
+                                                    <div class="col-6 col-md-4">
+                                                        <div class="card h-100 shadow-sm text-bg-info">
+                                                            <div class="card-body">
+                                                                <h5 class="card-title">${value['humidity']}</h5>
+                                                                <small class="card-text"> Humidity</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 col-md-4">
+                                                        <div class="card h-100 shadow-sm ${value['light_level'] > 0 ? 'text-bg-light' : 'text-bg-secondary'}">
+                                                            <div class="card-body">
+                                                                <h5 class="card-title">${value['light_level']}</h5>
+                                                                <small class="card-text">Light Level</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 col-md-4">
+                                                        <div class="card h-100 shadow-sm text-bg-info">
+                                                            <div class="card-body">
+                                                                <h5 class="card-title">${value['co2']}</h5>
+                                                                <small class="card-text">CO2</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 col-md-6">
+                                                        <div class="card h-100 shadow-sm text-bg-info">
+                                                            <div class="card-body">
+                                                                <h5 class="card-title">${value['temperature_in_fahrenheit']}</h5>
+                                                                <small class="card-text">Temperature</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6 offset-3 col-md-6 offset-md-0">
+                                                        <div class="card h-100 shadow-sm text-bg-info">
+                                                            <div class="card-body">
+                                                                <h5 class="card-title">${value['humidity_ratio']}</h5>
+                                                                <small class="card-text">Humidity Ratio</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        `
+                                    }
+                                });
+
+                                if ($('.alert-danger').length)
+                                {
+                                    $('.alert-danger').remove();
+                                }
+
+                                $('#latest_data').html(html);
+                                $('#latest_data').data('last-updated', updated_ts)
+                                
+                                var alert = $('#alertInfo')
+                                alert.html(`Last Updated: ${updated_ts.replace('T',' ')}`)
+
+                                if (alert.hasClass('d-none')){
+                                    alert.removeClass('d-none')
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+            getLatestData();
+            setInterval(getLatestData, 1000);
+        });
+    </script> 
+
+{% endblock content %}
